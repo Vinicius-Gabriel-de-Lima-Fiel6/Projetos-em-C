@@ -1,0 +1,288 @@
+/*TRABALHO SOLICITADO PELO PROFESSOR JHONATAS PARA AP2 DE LP2
+VINICIUS GABRIEL DE LIMA FIEL
+MATRICULA 2515140086
+ENGENHARIA QUIMICA
+
+======================================
+ OBJETIVO DO PROJETO: CRIAR UM SISTEMA SIMPLES QUE PUDESSE FAZER CALCULOS QUIMICOS NUCLEARES E 
+ SISTEMAS LINEARES PARA ACELERAR CALCULOS DESNECESSARIOS.
+ 
+ O SISTEMA DE HISTORICO FOI BASEADO NOS LINKS QUE COLOQUEI NOS SLIDES, MAS FIZ ALTERA��ES.
+ A PARTE DE MATRIZES FOI BASEADA NO METODO DE LAPLACE DO ENSINO MEDIO PARA RESOLVER SISTEMAS LINEARES
+ 
+
+TENTEI SEGUIR A REGRA DA RESPONSABILIDADE �NICA COMO O SENHOR PEDIU, MAS FOI BEM DIF�CIL :( 
+ESPERO ESTAR CERTO
+====================================
+
+
+*/
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h> 
+
+#define MAX_HISTORICO 200
+//================================================================
+float calcularDeterminante(float *m, int ordem) 
+{
+    float res=0,sinal=1,t[25];
+    int k=0,cof,i,j;
+    if (ordem == 1) return m[0];
+    if (ordem == 2) return m[0]*m[3] - m[1]*m[2];
+
+    for (cof = 0; cof < ordem; cof++) 
+    {
+        for ( i = 1; i < ordem; i++) 
+        {
+            for (j = 0; j < ordem; j++) 
+            {
+                if (j == cof) continue; 
+                t[k++] = m[i*ordem + j];
+            }
+        }
+        res += sinal * m[cof] * calcularDeterminante(t, ordem - 1);
+        sinal = -sinal;
+    }
+    return res;
+}
+void lerOrdemMatriz(int *n) 
+{
+    printf("Digite a ordem da matriz(1-5): ");
+    scanf("%d", n);
+}
+
+void lerMatriz(float *m, int n) 
+{
+    int i,j;
+    printf("Digite os %d valores da matriz:\n", n*n);
+    for (i = 0; i < n; i++) 
+    {
+        for (j = 0; j < n; j++) 
+        {
+            printf("Digite o elemento[%d][%d]: ", i+1, j+1);
+            scanf("%f", &m[i*n + j]);
+        }
+    }
+}
+
+
+
+float calcDecaimento(float N0, float l, float t) 
+{
+	return N0 * expf(-l * t);
+	}
+float calcAtividadeTempo(float A0, float l, float t) 
+{
+	return A0 * expf(-l * t);
+	}
+float calcMeiaVida(float l) {
+	return 0.693147f / l;
+	}
+float calcAtividade(float N, float l) {
+	return N * l;
+	}
+float calcDoseAbsorvida(float E, float m) {
+	return E / m;
+	}
+float calcDoseEquivalente(float D, float w) {
+	return D * w;
+	}
+float calcNumerodec(float N0, float l, float t) {
+	return N0 - (N0 * expf(-l * t));
+	}
+//=============================================================================================================
+const char* Calculo(int escolha)
+{
+    switch(escolha) 
+    {
+        case 1: 
+		return "Decaimento Radioativo";
+        case 2: 
+		return "Atividade pelo tempo";
+        case 3: 
+		return "Meia Vida";
+        case 4: 
+		return "Atividade radioativa";
+        case 5: 
+		return "Dose Absorvida";
+        case 6: 
+		return "Dose Equivalente";
+        case 7: 
+		return "Numero de decaimentos";
+        default: 
+		return "Radioatividade";
+    }
+}
+
+
+
+void salvarHistorico(const char *tipo, float r) 
+{
+    FILE *f = fopen("historicorad.txt", "a");
+    if (!f) return; 
+
+    fprintf(f, "[%s] Resultado = %.9f\n", tipo, r);
+    fclose(f);
+}
+
+void mostrarHistorico() 
+{
+    FILE *f = fopen("historicorad.txt", "r");
+    char linha[MAX_HISTORICO];
+
+    if (!f) 
+    {
+        printf("\nHistorico vazio.\n");
+        return;
+    }
+
+    printf("\n===== HIST�RICO =====\n");
+    while (fgets(linha, MAX_HISTORICO, f))
+        printf("%s", linha);
+
+    fclose(f);
+}
+
+
+//===========================================================================================
+void mostrarResultado(float res) 
+{
+    printf(">>>>>>>>Resultado = %.9f<<<<<<<<<<<<<<\n", res);
+}
+
+void lerParametros1(float *N0, float *l, float *t)
+{
+    printf("Digite N0: "); scanf(" %f", N0);
+    printf("Digite l (Lambda): "); scanf(" %f", l);
+    printf("Digite t (Tempo): "); scanf(" %f", t);
+}
+
+void lerParametros2(float *A0, float *l, float *t)
+{
+    printf("Digite A0: "); scanf(" %f", A0);
+    printf("Digite l : "); scanf(" %f", l);
+    printf("Digite t (Tempo): "); scanf(" %f", t);
+}
+
+void lerParametros3(float *l)
+{
+    printf("Digite l : "); scanf(" %f", l);
+}
+
+void lerParametros4(float *N, float *l)
+{
+    printf("Digite N: "); scanf(" %f", N);
+    printf("Digite l : "); scanf(" %f", l);
+}
+
+void lerParametros5(float *E, float *m)
+{
+    printf("Digite E (Energia): "); scanf(" %f", E);
+    printf("Digite m (Massa): "); scanf(" %f", m);
+}
+
+void lerParametros6(float *D, float *w)
+{
+    printf("Digite D : "); scanf(" %f", D);
+    printf("Digite w : "); scanf(" %f", w);
+}
+
+
+float direcionarCalculoRadioativo(int op)
+{
+    float N0, A0, l, t, N, E, m, D, w, resultado;
+    
+    switch(op)  
+    {
+        case 1:
+            lerParametros1(&N0, &l, &t);
+            resultado = calcDecaimento(N0, l, t);
+            break;
+        case 2: 
+            lerParametros2(&A0, &l, &t);
+            resultado = calcAtividadeTempo(A0, l, t);
+            break;
+        case 3:
+            lerParametros3(&l);
+            resultado = calcMeiaVida(l);
+            break;
+        case 4: 
+            lerParametros4(&N, &l);
+            resultado = calcAtividade(N, l);
+            break;
+        case 5:
+            lerParametros5(&E, &m);
+            resultado = calcDoseAbsorvida(E, m);
+            break;
+        case 6: 
+            lerParametros6(&D, &w);
+            resultado = calcDoseEquivalente(D, w);
+            break;
+        case 7:
+            lerParametros1(&N0, &l, &t); 
+            resultado = calcNumerodec(N0, l, t);
+            break;
+        default:
+            break;
+    }
+    return resultado;
+//======================================================================================================================
+}
+void organizarCalculoMatriz() {
+    int n;
+    float m[25],res;
+
+    lerOrdemMatriz(&n);
+    lerMatriz(m, n);
+    res = calcularDeterminante(m, n);
+    mostrarResultado(res);
+    salvarHistorico("Determinante", res);}
+    
+void organizarinterfaceCalculoRadioativo() {
+    int opcao,resultado;
+    
+    printf("\n===== Escolha o tipo de calculo =====\n");
+    printf("1 - Decaimento Radioativo\n2-Atividade pelo Tempo\n3-Meia_vida\n4-Atividade Radioativa\n5-Dose absorvida\n6-Dose equivalente\n7-Numero de decaimentos\n");
+    printf("Opcao: ");
+    scanf("%d",&opcao);
+    resultado = direcionarCalculoRadioativo(opcao);
+    if (opcao >= 1 && opcao <= 7) {
+        mostrarResultado(resultado);
+        salvarHistorico(Calculo(opcao), resultado);}}
+//=========================================================================================================================
+void menu() 
+{
+    int opcao;
+    do {
+        printf("\n====== MENU PRINCIPAL ======\n");
+        printf("1-Matrizes\n2-Calculos Nucleares\n3-Historico\n0 - fechar o sistema\n");
+        printf("Opcao: ");
+        scanf("%d",&opcao);
+        switch(opcao) 
+        {
+            case 1: 
+                organizarCalculoMatriz();
+                break;
+            case 2: 
+                organizarinterfaceCalculoRadioativo(); 
+                break;
+            case 3:
+                mostrarHistorico(); 
+                break;
+            case 0:
+                printf("Saindo do Sistema.\n");
+                break;
+            default:
+                break;
+        }   
+
+    } while(opcao != 0);
+}
+
+int main()
+{
+	printf("\n======================SOISTEMA QUIMUICO E MATEMATICO======================\n\n\n");
+    menu();
+    return 0;
+}
