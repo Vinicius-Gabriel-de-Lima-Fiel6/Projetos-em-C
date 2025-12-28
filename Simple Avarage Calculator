@@ -1,0 +1,54 @@
+
+
+#include <stdio.h>
+#define ALUNOS 20
+
+float calcular_media(float Nota1,float Nota2,float Nota3,char Escolha)
+{
+	float mediaA,mediaP;
+	switch(Escolha)
+	{
+		case 'A':
+		    mediaA=(Nota1+Nota2+Nota3)/3.0;
+		    return mediaA;
+		    break;
+		case 'P':
+			mediaP=(Nota1*5+Nota2*3+Nota3*2)/10;
+			return mediaP;
+			break;
+		default:
+			printf("Voce digitou errada a opcao."); 
+			return -1;
+			break;
+	}	
+}
+
+int main()
+{
+    int i;
+    float n1,n2,n3,media_calculada;
+    char opcao;
+    
+	printf("------Calculador de Notas de Classe------\n");
+	for(i=1;i<=ALUNOS;i++)	
+	{
+		printf("-----ALUNO %d-----",i);
+	    printf("\nDigite a Primeira Nota: ");scanf(" %f", &n1);
+	    printf("Digite a Segunda Nota: ");scanf(" %f", &n2);
+	    printf("Digite a Terceira Nota: ");scanf(" %f", &n3);
+	    do{
+		    printf("\n----Vamos escolher uma opcao-----\n\n");
+	        printf("A-Media Aritmetica;\nP-Media Ponderada.\n");
+	        printf("\nDigite a sua opcao: ");scanf(" %c", &opcao);
+	        
+	        printf("\n----Media Do Aluno----\n");
+	        media_calculada=calcular_media(n1,n2,n3,opcao);
+	        if(media_calculada!=-1)
+	        {
+	        	printf("\nA media do aluno %d e: %.3f\n", i, media_calculada);
+			}	
+		}while(media_calculada==-1);
+ 
+	}
+	return 0;
+}
